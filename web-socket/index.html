@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input placeholder="Enter your msg here" type ="text" id="msg"/>
+    <button>Send</button>
+    <script>
+        let sock = new WebSocket("ws://localhost:5500");
+        sock.onopen = function (event){
+            //alert("Socket connected");
+            setTimeout (()=>{
+                sock.send("hello")
+            },1000)
+        }
+        sock.onmessage = function (event){
+            console.log(event.data)
+        }
+
+        // document.querySelector("button").onclick = function (){
+        //     let msg =document.getElementById("msg").value;
+        //     sock.send(msg)
+        // }
+
+
+    </script>
+</body>
+</html>
