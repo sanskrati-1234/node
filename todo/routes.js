@@ -1,5 +1,5 @@
 import express, { response } from "express";
-import data from "./data";
+import data from "./data.js";
 const route = express.Router();
 
 route.get("/data/:id",(req,res)=>{
@@ -14,7 +14,7 @@ route.get("/data/:id",(req,res)=>{
 route.get("/data",(req,res)=>{
     const { name } = req.query;
     const msg =`hi ${name || "there"}`;
-    res.send({msg})
+    res.send(data)
 })
 // route.get("/data",(req,res)=>{
 //     res.status(201).json(data);
