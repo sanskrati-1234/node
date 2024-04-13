@@ -12,12 +12,12 @@ app.use(cors({ origin: true, credentials: true })); // Set CORS policy for Expre
 app.use("/todo", todoRoutes);
 
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://127.0.0.1:5173");
-    res.header("Access-Control-Allow-Methods", "GET, POST");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+// app.use((req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "http://127.0.0.1:5173");
+//     res.header("Access-Control-Allow-Methods", "GET, POST");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
 const io = new Server(server, {
     cors: { origin: "http://127.0.0.1:5173", methods: ["GET", "POST"] },
 });
