@@ -283,6 +283,90 @@ db.orders.aggregate([
 ]);
 
 
+/// getOrderDetails
+
+db.orders.aggregate([
+    {$match :{
+        orderId:"201",
+    }},{
+        $lookup:{
+            from: "users",
+            let :{parsedUserId:{$toInt:"$userId"}},
+            pipeline:[{
+                $match:{
+                    $expr:{$eq:["$$parsedUserId","$userId"]}
+                }
+            }],
+            as:"UserInfo"
+        }
+    },{
+        $lookup:{
+            from :"products",
+            localField:"products.productId",
+            foreignField:"productId",
+            as:"ProductInfo"
+        }
+    },{
+        $project:{
+            _id:0,
+            orderId:1,
+            name:{$first:"$UserInfo.name"},
+            email:{$first:"$UserInfo.email"},
+            orderedProducts: {
+                $map: {
+                    input: "$ProductInfo",
+                    as: "product",
+                    in: {
+                        name: "$$product.name",
+                        price: "$$product.price",
+                    },
+                },
+            },
+        }
+    }
+])
 
 
-db.orders.aggregate
+
+// getTransection
+
+
+db.transactions.aggregate([
+    {
+        $match:{
+            transactionId:"301"
+        }
+    },{
+        
+       $lookup: {
+        from : "orders",
+        localField:"orderId",
+        foreignField:"orderId",
+        as:"OrderInfo"
+
+    }},{
+        $unwind:"$OrderInfo",
+    },{
+        $lookup: {
+            from:"users",
+             let: {
+        userId: { $toInt: "$OrderInfo.userId" }, // Converts the string userId from orderDetails to an integer
+      },
+            pipeline: [
+                {
+                $match: {
+                    $expr: {
+                    $eq: ["$$userId", "$userId"] // Compare integers to integers
+                    }
+                }
+                }
+            ],
+            as:"userInfo"
+        }
+    } ,{
+    $unwind: {
+      path: "$userInfo",
+      preserveNullAndEmptyArrays: true // Optional based on your need for output structure
+    }
+  }
+])
