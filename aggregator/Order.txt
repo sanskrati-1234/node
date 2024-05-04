@@ -1,0 +1,99 @@
+
+db.transactions.aggregate([
+  {
+    $match: {
+      transactionId: "301"
+    }
+  },
+  {
+    $lookup: {
+      from: "orders",
+      localField: "orderId",
+      foreignField: "orderId",
+      as: "orderDetails"
+    }
+  },
+  {
+    $unwind: "$orderDetails" // Ensures that each document coming into the next stage has exactly one orderDetail
+  },
+  {
+    $lookup: {
+      from: "users",
+      let: {
+        userId: { $toInt: "$orderDetails.userId" }, // Converts the string userId from orderDetails to an integer
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ["$$userId", "$userId"] // Compare integers to integers
+            }
+          }
+        }
+      ],
+      as: "userDetails"
+    }
+  },
+  {
+    $unwind: {
+      path: "$userDetails",
+      preserveNullAndEmptyArrays: true // Optional based on your need for output structure
+    }
+  }
+]);
+
+
+
+
+
+
+
+
+
+
+db.orders.aggregate([
+  {
+    $match: {
+      orderId: "201",
+    },
+  },
+  {
+    $lookup: {
+      from: "users",
+      let: { constructtUserId: { $toInt: "$userId" } },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$$constructtUserId", "$userId"] } } },
+      ],
+      as: "userInfo",
+    },
+  },
+  {
+    $lookup: {
+      from: "products",
+      localField: "products.productId",
+      foreignField: "productId",
+      as: "productInfo",
+    },
+  },
+  {
+    $project: {
+      _id: false,
+      orderId: true,
+      status: true,
+      userName: { $first: "$userInfo.name" },
+      userMail: { $first: "$userInfo.email" },
+      userAddress: { $first: "$userInfo.address" },
+      orderedProducts: {
+        $map: {
+          input: "$productInfo",
+          as: "product",
+          in: {
+            name: "$$product.name",
+            price: "$$product.price",
+          },
+        },
+      },
+    },
+  },
+]);
+
