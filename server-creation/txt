@@ -1,0 +1,77 @@
+db.transactions.aggregate([
+    {
+      $match: {
+        transactionId: "301",
+      },
+    },
+    {
+      $lookup: {
+        from: "orders", // replace "orders" with the actual name of your orders collection
+        localField: "orderId",
+        foreignField: "orderId",
+        as: "orderDetails",
+      },
+    },
+    {
+      $unwind: "$orderDetails", // Unwind orderDetails as each transaction should map to exactly one order
+    },
+    {
+        $lookup: {
+          from: "users",
+          let: {
+            integerOrderDetailUserId: {
+              $toInt: { $first: "$orderDetails.userId" },
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$integerOrderDetailUserId", "$userID"] },
+              },
+            },
+          ],
+          as: "userDetails",
+        }}
+  ]);
+
+
+
+  db.transactions.aggregate([
+    {
+      $match: {
+        transactionId: "301"
+      }
+    },
+    {
+      $lookup: {
+        from: "orders",
+        localField: "orderId",
+        foreignField: "orderId",
+        as: "orderDetails"
+      }
+    },
+    {
+      $unwind: "$orderDetails"
+    },
+    {
+      $lookup: {
+        from: "users", 
+        let: {
+            integerOrderDetailUserId: {
+              $toInt: { $first: "$orderDetails.userId" },
+            },
+          }.
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$$integerOrderDetailUserId", "$userId"] }
+            }
+          }
+        ],
+        as: "userDetails"
+      }
+    }
+  ])
+  
+
+
